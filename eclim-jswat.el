@@ -58,7 +58,7 @@
          (jswat-cmd (concat (file-name-as-directory jswat-path) "jswat"))
          (proj-sourcepath (eclim-jswat-project-src-folder))
          (jswat-src-path (concat java-src-zip eclim-jswat-classpath-separator proj-sourcepath))
-         (jswat-class-path (concat java-src-zip jswat-classpath-separator (eclim-jswat-project-classpath))))
+         (jswat-class-path (concat java-src-zip eclim-jswat-classpath-separator (eclim-jswat-project-classpath))))
     (concat
      jswat-cmd
      " 'sourcepath \"" jswat-src-path "\""
