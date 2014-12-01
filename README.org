@@ -1,0 +1,5 @@
+#+TITLE:README
+
+Primitive JSwat 2.40 integration for emacs-eclim.
+
+emacs-eclim doesn't provide debugger support.
