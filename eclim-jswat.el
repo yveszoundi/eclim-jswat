@@ -73,15 +73,21 @@
   "Please configure the `eclim-jwat-path' variable using `M-x customize-group eclim-jswat.'"
   "Error message to configure the JSwat installation folder.")
 
+(defconst eclim-jswat-msg-set-main-class
+  "Please set 'org.eclim.java.run.mainclass' variable using the emacs-eclim
+`project_setting' command.
+  eclim -command project_setting -p project org.eclim.java.run.mainclass -s  -v classname"
+  "Error message to set the project main class.")
+
 (defconst eclim-jswat-msg-configure-eclim
   "Ensure that `eclim-mode is enabled and that you're within an Eclipse project."
   "Error message to validate eclim mode configuration.")
 
 (defun eclim-jswat--sanity-check-warnings ()
-  (if (null eclim-jswat-path)
-      (warn eclim-jswat-msg-configure-path)
-    (if (null (eclim--project-dir))
-        (warn eclim-jswat-msg-configure-eclim))))
+  (cond
+   ((null eclim-jswat-path)              (warn eclim-jswat-msg-configure-path))
+   ((null (eclim--project-dir))          (warn eclim-jswat-msg-configure-eclim))
+   ((null (eclim-jswat--main-run-class)) (warn eclim-jswat-msg-set-main-class))))
 
 (defun eclim-jswat--buffer-name (mode)
   "Returns the buffer name holding the Eclim JSwat process
