@@ -49,7 +49,7 @@
                                         (when (string= cp-kind "src")
                                            (cdr (assoc 'path (last (car (last cp-entry)))))))))
                                   eclim-classpath-entries)))
-    (jswat-dir-path (eclim--project-dir) (car (remove-if 'null eclim-prj-sources)))))
+    (eclim-jswat-dir-path (eclim--project-dir) (car (remove-if 'null eclim-prj-sources)))))
 
 (defun eclim-jswat-make-command ()
   (let* ((java-vm (eclim-jswat-dir-path (getenv "JAVA_HOME") "bin" "java"))
