@@ -51,7 +51,7 @@
                                   eclim-classpath-entries)))
     (jswat-dir-path (eclim--project-dir) (car (remove-if 'null eclim-prj-sources)))))
 
-(defun jswat-make-command ()
+(defun eclim-jswat-make-command ()
   (let* ((java-vm (eclim-jswat-dir-path (getenv "JAVA_HOME") "bin" "java"))
          (jpda-jar (eclim-jswat-dir-path (getenv "JAVA_HOME") "lib" "tools.jar"))
          (java-src-zip (eclim-jswat-dir-path (getenv "JAVA_HOME") "src.zip"))
