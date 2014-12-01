@@ -41,9 +41,12 @@
 ;; Add the folder containing eclim-jswat.el.el in your load-path
 ;; (add-to-list 'load-path "~/.emacs.d/lisp/")
 ;;
-;; (require 'eclim-jswat)
+;; (eval-after-load "eclim-jswat"
+;; (progn
+;;    (require 'eclim-jswat)
+;;    '(setq eclim-jswat-path (expand-file-name "~/Downloads/jswat-2.40"))))
 ;;
-;; Run jswat via `M-x eclim-jswat-run'.
+;; Run jswat via `M-x eclim-jswat-run' or bind it to a keystroke.
 
 ;;; Code:
 
@@ -120,7 +123,8 @@ within a compilation `mode'."
          (eclim-prj-sources        (mapcar #'(lambda (cp-entry-def)
                                                (let ((cp-entry (second cp-entry-def)))
                                                  (when (string= "src" (cdr (assoc 'kind cp-entry)))
-                                                   (eclim-jswat--dir-path (eclim--project-dir) (cdr (assoc 'path cp-entry))))))
+                                                   (eclim-jswat--dir-path (eclim--project-dir)
+                                                                          (cdr (assoc 'path cp-entry))))))
                                            eclim-classpath-entries))
          (non-null-eclim-prj-sources (cl-remove-if #'null eclim-prj-sources)))
     (mapconcat #'identity non-null-eclim-prj-sources eclim-jswat-classpath-separator)))
