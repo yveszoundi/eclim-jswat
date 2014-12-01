@@ -48,7 +48,7 @@
                                             (eclim-jswat--dir-path (eclim--project-dir) (cdr (assoc 'path cp-entry))))))
                                     eclim-classpath-entries))
          (non-null-eclim-prj-sources (cl-remove-if #'null eclim-prj-sources)))
-    (mapconcat #'identity non-null-eclim-prj-sources ":")))
+    (mapconcat #'identity non-null-eclim-prj-sources eclim-jswat-classpath-separator)))
 
 (defun eclim-jswat--make-command ()
   (let* ((java-vm (eclim-jswat--dir-path (getenv "JAVA_HOME") "bin" "java"))
