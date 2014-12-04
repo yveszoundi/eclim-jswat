@@ -72,6 +72,10 @@
   "org.eclim.java.run.mainclass"
   "Eclipse preference setting used by Eclim to determine the project main class.")
 
+(defconst eclim-jswat-msg-configure-java-home
+  "Please make sure that you have setup JAVA_HOME using `setenv'"
+  "Error message when JAVA_HOME is unknown.")
+
 (defconst eclim-jswat--executable-suffix
   (if (eq 'windows-nt system-type)
       ".bat"
@@ -97,7 +101,8 @@
   (cond
    ((null eclim-jswat-path)              (warn eclim-jswat-msg-configure-path))
    ((null (eclim--project-dir))          (warn eclim-jswat-msg-configure-eclim))
-   ((null (eclim-jswat--main-run-class)) (warn eclim-jswat-msg-set-main-class))))
+   ((null (eclim-jswat--main-run-class)) (warn eclim-jswat-msg-set-main-class))
+   ((null (getenv "JAVA_HOME"))          (warn eclim-jswat-msg-configure-java-home))))
 
 (defun eclim-jswat--buffer-name (mode)
   "Returns the buffer name holding the Eclim JSwat process
