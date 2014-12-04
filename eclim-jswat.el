@@ -72,6 +72,12 @@
   "org.eclim.java.run.mainclass"
   "Eclipse preference setting used by Eclim to determine the project main class.")
 
+(defconst eclim-jswat--executable-suffix
+  (if (eq 'windows-nt system-type)
+      ".bat"
+    "")
+  "Executable file suffix for the JSwat launcher.")
+
 (defconst eclim-jswat-msg-configure-path
   "Please configure the `eclim-jwat-path' variable using `M-x customize-group eclim-jswat.'"
   "Error message to configure the JSwat installation folder.")
@@ -87,6 +93,7 @@
   "Error message to validate eclim mode configuration.")
 
 (defun eclim-jswat--sanity-check-warnings ()
+  "Return warnings when settings/pre-requisisites fail."
   (cond
    ((null eclim-jswat-path)              (warn eclim-jswat-msg-configure-path))
    ((null (eclim--project-dir))          (warn eclim-jswat-msg-configure-eclim))
@@ -134,15 +141,20 @@ within a compilation `mode'."
   (let* ((java-vm          (eclim-jswat--dir-path (getenv "JAVA_HOME") "bin" "java"))
          (jpda-jar         (eclim-jswat--dir-path (getenv "JAVA_HOME") "lib" "tools.jar"))
          (java-src-zip     (eclim-jswat--dir-path (getenv "JAVA_HOME") "src.zip"))
-         (jswat-cmd        (concat (file-name-as-directory jswat-path) "jswat"))
-         (jswat-src-path   (concat java-src-zip eclim-jswat-classpath-separator (eclim-jswat--project-src-path)))
-         (jswat-class-path (concat java-src-zip eclim-jswat-classpath-separator (eclim-jswat--project-classpath))))
-    (concat
-     jswat-cmd
-     " 'sourcepath \"" jswat-src-path "\""
-     "; classpath \"" jswat-class-path "\""
-     "; view \"" (eclim-jswat--main-run-class) "\""
-     "; run \"" (eclim-jswat--main-run-class) "\"'")))
+         (jswat-cmd        (concat (file-name-as-directory jswat-path)
+                                   "jswat"
+                                   eclim-jswat--executable-suffix))
+         (jswat-src-path   (concat java-src-zip
+                                   eclim-jswat-classpath-separator
+                                   (eclim-jswat--project-src-path)))
+         (jswat-class-path (concat java-src-zip
+                                   eclim-jswat-classpath-separator
+                                   (eclim-jswat--project-classpath))))
+    (concat jswat-cmd
+            " 'sourcepath \"" jswat-src-path                "\""
+            "; classpath \""  jswat-class-path              "\""
+            "; view \""       (eclim-jswat--main-run-class) "\""
+            "; run \""        (eclim-jswat--main-run-class) "\"'")))
 
 ;;;###autoload
 (defun eclim-jswat-run ()
