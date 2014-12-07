@@ -6,7 +6,7 @@
 ;; Keywords: debugger, java, eclim
 ;; Author: Yves Zoundi <rimerosolutions@gmail.com>
 ;; Maintainer: Yves Zoundi
-;; Package-Requires: ((emacs "24") (cl-lib "0.5") ("emacs-eclim"))
+;; Package-Requires: ((emacs "24") (cl-lib "0.5") (emacs-eclim))
 ;; Contributors: The internet and people who surf it.
 ;; Last updated: 2014-12-01
 
@@ -76,6 +76,10 @@
   "Please make sure that you have setup JAVA_HOME using `setenv'"
   "Error message when JAVA_HOME is unknown.")
 
+(defconst eclim-jswat--executable-basename
+  "jswat"
+  "Basename of JSwat executable.")
+
 (defconst eclim-jswat--executable-suffix
   (if (eq 'windows-nt system-type)
       ".bat"
@@ -95,6 +99,10 @@
 (defconst eclim-jswat-msg-configure-eclim
   "Ensure that `eclim-mode is enabled and that you're within an Eclipse project."
   "Error message to validate eclim mode configuration.")
+
+(defconst eclim-jswat--eclipse-class-path-file
+  ".classpath"
+  "Filename for the Eclipse project classpath contents.")
 
 (defun eclim-jswat--sanity-check-warnings ()
   "Return warnings when settings/pre-requisisites fail."
@@ -129,15 +137,16 @@ within a compilation `mode'."
 
 (defun eclim-jswat--project-src-path ()
   "Get the project source path by parsing the .classpath project file."
-  (let* ((eclim-prj-classpath-file (eclim-jswat--dir-path (eclim--project-dir) ".classpath"))
-         (eclim-prj-classpath      (xml-parse-file eclim-prj-classpath-file))
-         (eclim-classpath-entries  (xml-get-children (car eclim-prj-classpath) 'classpathentry))
-         (eclim-prj-sources        (mapcar #'(lambda (cp-entry-def)
-                                               (let ((cp-entry (second cp-entry-def)))
-                                                 (when (string= "src" (cdr (assoc 'kind cp-entry)))
-                                                   (eclim-jswat--dir-path (eclim--project-dir)
-                                                                          (cdr (assoc 'path cp-entry))))))
-                                           eclim-classpath-entries))
+  (let* ((eclim-prj-classpath-file   (eclim-jswat--dir-path (eclim--project-dir)
+                                                            eclim-jswat--eclipse-class-path-file))
+         (eclim-prj-classpath        (xml-parse-file eclim-prj-classpath-file))
+         (eclim-classpath-entries    (xml-get-children (car eclim-prj-classpath) 'classpathentry))
+         (eclim-prj-sources          (mapcar #'(lambda (cp-entry-def)
+                                                 (let ((cp-entry (second cp-entry-def)))
+                                                   (when (string= "src" (cdr (assoc 'kind cp-entry)))
+                                                     (eclim-jswat--dir-path (eclim--project-dir)
+                                                                            (cdr (assoc 'path cp-entry))))))
+                                             eclim-classpath-entries))
          (non-null-eclim-prj-sources (cl-remove-if #'null eclim-prj-sources)))
     (mapconcat #'identity non-null-eclim-prj-sources eclim-jswat-classpath-separator)))
 
@@ -147,7 +156,7 @@ within a compilation `mode'."
          (jpda-jar         (eclim-jswat--dir-path (getenv "JAVA_HOME") "lib" "tools.jar"))
          (java-src-zip     (eclim-jswat--dir-path (getenv "JAVA_HOME") "src.zip"))
          (jswat-cmd        (concat (file-name-as-directory jswat-path)
-                                   "jswat"
+                                   eclim-jswat--executable-basename
                                    eclim-jswat--executable-suffix))
          (jswat-src-path   (concat java-src-zip
                                    eclim-jswat-classpath-separator
