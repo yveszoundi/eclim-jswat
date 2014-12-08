@@ -1,5 +1,19 @@
 #+TITLE:README
 
-Primitive JSwat 2.40 integration for emacs-eclim.
+* Overview
+Primitive [[https://github.com/nlfiedler/jswat][JSwat]] 2.40 integration for [[https://github.com/senny/emacs-eclim][emacs-eclim]].
 
-emacs-eclim doesn't provide debugger support.
+=emacs-eclim= doesn't provide any debugger support.
+
+* Notes
+
+- Only JSwat 2.40 is supported. Newer versions of JSwat seem to use [[https://netbeans.org/features/platform/][NetBeans RCP platform]] and there doesn't seem to be a way to pass commands to JSwat from a shell invocation.
+
+- Breakpoints can only be set within JSwat.
+
+- The only thing that this plugin does is the following:
+ - Setup the classpath for JSwat.
+ - Setup the source path for JSwat (From the [[https://eclipse.org/home/index.php][Eclipse]] =.classpath= project file).
+ - Setup the main class to run.
+ - Setup the file to edit upon when JSwat is launched.
+
