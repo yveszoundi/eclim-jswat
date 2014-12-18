@@ -17,3 +17,15 @@ Primitive [[https://github.com/nlfiedler/jswat][JSwat]] 2.40 integration for [[h
  - Setup the main class to run.
  - Setup the file to edit upon when JSwat is launched.
 
+* Installation
+
+** El-get
+Add the following to your =el-get-sources=.
+
+=(:name eclim-jswat :type github :pkgname "yveszoundi/eclim-jswat")=
+
+** Cask
+Add the following to your =Cask= file.
+
+=(depends-on "eclim-jswat" :git "https://github.com/yveszoundi/eclim-jswat")=
+

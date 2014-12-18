@@ -93,7 +93,10 @@
 (defconst eclim-jswat-msg-set-main-class
   "Please set 'org.eclim.java.run.mainclass' variable using the emacs-eclim
 `project_setting' command.
-  eclim -command project_setting -p project -s org.eclim.java.run.mainclass -v classname"
+eclim -command project_setting
+-p project
+-s org.eclim.java.run.mainclass
+-v classname"
   "Error message to set the project main class.")
 
 (defconst eclim-jswat-msg-configure-eclim
