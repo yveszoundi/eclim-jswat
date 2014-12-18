@@ -1,5 +1,7 @@
 #+TITLE:README
 
+[[https://github.com/yveszoundi/eclim-jswat/blob/master/LICENSE][file:http://img.shields.io/badge/license-GNU%20GPLv3-blue.svg]]
+
 * Overview
 Primitive [[https://github.com/nlfiedler/jswat][JSwat]] 2.40 integration for [[https://github.com/senny/emacs-eclim][emacs-eclim]].
 
@@ -53,8 +55,8 @@ I use the following function to achieve it:
 
 ** Running the command
 
-Add the following to your Emacs =init= file and replace =eclim-jswat-path=
-with the location of your JSwat 2.0 installation.
+Add the following to your Emacs =init= file and replace the value of
+=eclim-jswat-path= with the location of your JSwat 2.0 installation.
 
 : (eval-after-load "eclim-jswat"
 : (progn
