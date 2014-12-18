@@ -29,3 +29,37 @@ Add the following to your =Cask= file.
 
 =(depends-on "eclim-jswat" :git "https://github.com/yveszoundi/eclim-jswat")=
 
+** Manual
+Download =eclim-jswat.el= and add it to a folder within your Emacs =load-path=.
+See for reference the relevant [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][Emacs Manual page]] for details.
+
+* Usage
+
+** Pre-requisites
+You must set the main class of the =eclim= managed project.
+The preference variable is =org.eclim.java.run.mainclass=.
+
+I use the following function to achieve it:
+
+: (defun ers-eclim-project-set-as-main-class ()
+:       (interactive)
+:       (if (not (string= major-mode "java-mode"))
+:           (message "Sorry cannot run current buffer."))
+:       (compile (concat eclim-executable
+:                        " -command project_setting"
+:                        " -p " eclim--project-name
+:                        " -s " "org.eclim.java.run.mainclass"
+:                       " -v " (eclim-package-and-class))))
+
+** Running the command
+
+Add the following to your Emacs =init= file and replace =eclim-jswat-path=
+with the location of your JSwat 2.0 installation.
+
+: (eval-after-load "eclim-jswat"
+: (progn
+:  (require 'eclim-jswat)
+:    '(setq eclim-jswat-path (expand-file-name "~/Downloads/jswat-2.40"))))
+
+You should now be able to run jswat via =M-x eclim-jswat-run=. 
+You can bind it to a keystroke of your liking for convenience.
