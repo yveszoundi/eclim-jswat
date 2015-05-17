@@ -1,14 +1,15 @@
 ;;; eclim-jswat.el --- Eclim interface to JSwat 2.40.
 
-;; Copyright (C) 2014, Yves Zoundi
+;; Copyright (C) 2014-2015, Yves Zoundi
 
-;; Version: 0.0.1
+;; Version: 0.1.0
 ;; Keywords: debugger, java, eclim
+;; Homepage: https://github.com/yveszoundi/eclim-jswat
 ;; Author: Yves Zoundi <rimerosolutions@gmail.com>
 ;; Maintainer: Yves Zoundi
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5") (emacs-eclim))
 ;; Contributors: The internet and people who surf it.
-;; Last updated: 2014-12-01
+;; Last updated: 2015-05-17
 
 ;; This file is not part of GNU Emacs.
 
@@ -46,7 +47,8 @@
 ;;    (require 'eclim-jswat)
 ;;    '(setq eclim-jswat-path (expand-file-name "~/Downloads/jswat-2.40"))))
 ;;
-;; Run jswat via `M-x eclim-jswat-run' or bind it to a keystroke.
+;; Run jswat via `M-x eclim-jswat-run' to view and run a main class.
+;; Run jswat via `M-x eclim-jswat-attach' to view the current class and connect to a VM.
 
 ;;; Code:
 
@@ -90,15 +92,7 @@
   "Please configure the `eclim-jwat-path' variable using `M-x customize-group eclim-jswat.'"
   "Error message to configure the JSwat installation folder.")
 
-(defconst eclim-jswat-msg-set-main-class
-  "Please set 'org.eclim.java.run.mainclass' variable using the emacs-eclim
-`project_setting' command.
-eclim -command project_setting
--p project
--s org.eclim.java.run.mainclass
--v classname"
-  "Error message to set the project main class.")
-
+eclim-jswat-msg-set-main-class
 (defconst eclim-jswat-msg-configure-eclim
   "Ensure that `eclim-mode is enabled and that you're within an Eclipse project."
   "Error message to validate eclim mode configuration.")
@@ -112,7 +106,6 @@ eclim -command project_setting
   (cond
    ((null eclim-jswat-path)              (warn eclim-jswat-msg-configure-path))
    ((null (eclim--project-dir))          (warn eclim-jswat-msg-configure-eclim))
-   ((null (eclim-jswat--main-run-class)) (warn eclim-jswat-msg-set-main-class))
    ((null (getenv "JAVA_HOME"))          (warn eclim-jswat-msg-configure-java-home))))
 
 (defun eclim-jswat--buffer-name (mode)
@@ -125,7 +118,6 @@ within a compilation `mode'."
   (compilation-start cmd 'compilation-mode 'eclim-jswat--buffer-name))
 
 (defun eclim-jswat--project-classpath ()
-  "Get the project classpath."
   (eclim/java-classpath eclim--project-name))
 
 (defun eclim-jswat--main-run-class ()
@@ -134,8 +126,8 @@ within a compilation `mode'."
 
 (defun eclim-jswat--dir-path (p-root &rest path-elements)
   "Build a path from a given root `p-root' and relative sub-paths `path-elements.'"
-  (cl-reduce '(lambda (x &optional y)
-                (concat (file-name-as-directory x) y))
+  (cl-reduce (lambda (x &optional y)
+               (concat (file-name-as-directory x) y))
              path-elements :initial-value p-root))
 
 (defun eclim-jswat--project-src-path ()
@@ -144,41 +136,76 @@ within a compilation `mode'."
                                                             eclim-jswat--eclipse-class-path-file))
          (eclim-prj-classpath        (xml-parse-file eclim-prj-classpath-file))
          (eclim-classpath-entries    (xml-get-children (car eclim-prj-classpath) 'classpathentry))
-         (eclim-prj-sources          (mapcar #'(lambda (cp-entry-def)
-                                                 (let ((cp-entry (second cp-entry-def)))
-                                                   (when (string= "src" (cdr (assoc 'kind cp-entry)))
-                                                     (eclim-jswat--dir-path (eclim--project-dir)
-                                                                            (cdr (assoc 'path cp-entry))))))
+         (eclim-prj-sources          (mapcar (lambda (cp-entry-def)
+                                               (let ((cp-entry (second cp-entry-def)))
+                                                 (when (string= "src" (cdr (assoc 'kind cp-entry)))
+                                                   (eclim-jswat--dir-path (eclim--project-dir)
+                                                                          (cdr (assoc 'path cp-entry))))))
                                              eclim-classpath-entries))
          (non-null-eclim-prj-sources (cl-remove-if #'null eclim-prj-sources)))
     (mapconcat #'identity non-null-eclim-prj-sources eclim-jswat-classpath-separator)))
 
-(defun eclim-jswat--make-command ()
-  "Construct the JSwat command line."
+(defun eclim-jswat--build-src-and-classpath ()
+  "Build the source and classpath."
   (let* ((java-vm          (eclim-jswat--dir-path (getenv "JAVA_HOME") "bin" "java"))
          (jpda-jar         (eclim-jswat--dir-path (getenv "JAVA_HOME") "lib" "tools.jar"))
          (java-src-zip     (eclim-jswat--dir-path (getenv "JAVA_HOME") "src.zip"))
-         (jswat-cmd        (concat (file-name-as-directory jswat-path)
-                                   eclim-jswat--executable-basename
-                                   eclim-jswat--executable-suffix))
          (jswat-src-path   (concat java-src-zip
                                    eclim-jswat-classpath-separator
                                    (eclim-jswat--project-src-path)))
          (jswat-class-path (concat java-src-zip
                                    eclim-jswat-classpath-separator
                                    (eclim-jswat--project-classpath))))
+    (list jswat-src-path jswat-class-path)))
+
+(defun eclim-jswat--make-run-command ()
+  "Construct the JSwat command line."
+  (let* ((eclim-src-and-classpath (eclim-jswat--build-src-and-classpath))
+         (jswat-src-path          (car eclim-src-and-classpath))
+         (jswat-class-path        (car (cdr eclim-src-and-classpath)))
+         (jswat-class-path        (car (cdr eclim-src-and-classpath)))
+         (jswat-cmd               (concat (file-name-as-directory eclim-jswat-path)
+                                          eclim-jswat--executable-basename
+                                          eclim-jswat--executable-suffix)))
     (concat jswat-cmd
             " 'sourcepath \"" jswat-src-path                "\""
             "; classpath \""  jswat-class-path              "\""
             "; view \""       (eclim-jswat--main-run-class) "\""
             "; run \""        (eclim-jswat--main-run-class) "\"'")))
 
+(defun eclim-jswat--make-attach-command (port)
+  "Construct the JSwat command line."
+  (let* ((eclim-src-and-classpath (eclim-jswat--build-src-and-classpath))
+         (jswat-cmd               (concat (file-name-as-directory eclim-jswat-path)
+                                          eclim-jswat--executable-basename
+                                          eclim-jswat--executable-suffix))
+         (jswat-src-path          (car eclim-src-and-classpath))
+         (jswat-class-path        (car (cdr eclim-src-and-classpath)))
+         (current-class           (eclim-package-and-class)))
+    (set-text-properties 0 (length current-class) nil current-class)
+    (message "Your class %s" current-class)
+    (concat jswat-cmd
+            " 'sourcepath \"" jswat-src-path                "\""
+            "; view \""       current-class "\""
+            "; classpath \""  jswat-class-path              "\""
+            "; attach "       port "'")))
+
 ;;;###autoload
 (defun eclim-jswat-run ()
   "Invokes JSwat using the setup derived from the current Eclim session."
   (interactive)
+  (if (null (eclim-jswat--main-run-class))
+      (warn eclim-jswat-msg-set-main-class)
+    (progn
+      (when (null (eclim-jswat--sanity-check-warnings))
+        (eclim-jswat--launch (eclim-jswat--make-run-command))))))
+
+;;;###autoload
+(defun eclim-jswat-attach (port)
+  "Connect to a JVM for debugging, using the current Eclim session."
+  (interactive (list (read-string "JVM Debugger Socket Port: ")) )
   (when (null (eclim-jswat--sanity-check-warnings))
-    (eclim-jswat--launch (eclim-jswat--make-command))))
+    (eclim-jswat--launch (eclim-jswat--make-attach-command port))))
 
 (provide 'eclim-jswat)
 
