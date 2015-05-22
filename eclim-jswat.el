@@ -92,7 +92,10 @@
   "Please configure the `eclim-jwat-path' variable using `M-x customize-group eclim-jswat.'"
   "Error message to configure the JSwat installation folder.")
 
-eclim-jswat-msg-set-main-class
+(defconst eclim-jswat-msg-set-main-class
+  "Please set eclim the main class."
+  "Error message to setup the main class.")
+
 (defconst eclim-jswat-msg-configure-eclim
   "Ensure that `eclim-mode is enabled and that you're within an Eclipse project."
   "Error message to validate eclim mode configuration.")
