@@ -186,7 +186,6 @@ within a compilation `mode'."
          (jswat-class-path        (car (cdr eclim-src-and-classpath)))
          (current-class           (eclim-package-and-class)))
     (set-text-properties 0 (length current-class) nil current-class)
-    (message "Your class %s" current-class)
     (concat jswat-cmd
             " 'sourcepath \"" jswat-src-path                "\""
             "; view \""       current-class "\""
