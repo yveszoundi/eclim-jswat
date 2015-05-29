@@ -7,7 +7,7 @@
 ;; Homepage: https://github.com/yveszoundi/eclim-jswat
 ;; Author: Yves Zoundi <rimerosolutions@gmail.com>
 ;; Maintainer: Yves Zoundi
-;; Package-Requires: ((emacs "24") (cl-lib "0.5") (emacs-eclim))
+;; Package-Requires: ((emacs "24") (cl-lib "0.5") (emacs-eclim "0.2"))
 ;; Contributors: The internet and people who surf it.
 ;; Last updated: 2015-05-17
 
