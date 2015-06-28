@@ -2,14 +2,14 @@
 
 ;; Copyright (C) 2014-2015, Yves Zoundi
 
-;; Version: 0.1.0
+;; Version: 0.1.1
 ;; Keywords: debugger, java, eclim
 ;; Homepage: https://github.com/yveszoundi/eclim-jswat
 ;; Author: Yves Zoundi <rimerosolutions@gmail.com>
 ;; Maintainer: Yves Zoundi
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5") (emacs-eclim "0.2"))
 ;; Contributors: The internet and people who surf it.
-;; Last updated: 2015-05-17
+;; Last updated: 2015-06-28
 
 ;; This file is not part of GNU Emacs.
 
@@ -121,11 +121,11 @@ within a compilation `mode'."
   (compilation-start cmd 'compilation-mode 'eclim-jswat--buffer-name))
 
 (defun eclim-jswat--project-classpath ()
-  (eclim/java-classpath eclim--project-name))
+  (eclim/java-classpath (eclim--project-name)))
 
 (defun eclim-jswat--main-run-class ()
   "Retrieve the project main class from Eclim settings."
-  (eclim/project-setting eclim--project-name eclim-jswat-main-class-setting))
+  (eclim/project-setting (eclim--project-name) eclim-jswat-main-class-setting))
 
 (defun eclim-jswat--dir-path (p-root &rest path-elements)
   "Build a path from a given root `p-root' and relative sub-paths `path-elements.'"
@@ -205,7 +205,7 @@ within a compilation `mode'."
 ;;;###autoload
 (defun eclim-jswat-attach (port)
   "Connect to a JVM for debugging, using the current Eclim session."
-  (interactive (list (read-string "JVM Debugger Socket Port: ")) )
+  (interactive (list (read-number "JVM Debugger Socket Port: ")) )
   (when (null (eclim-jswat--sanity-check-warnings))
     (eclim-jswat--launch (eclim-jswat--make-attach-command port))))
 
